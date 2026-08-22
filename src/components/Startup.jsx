@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function Startup({ productions, onCreate, onOpen }) {
+export default function Startup({ productions, onCreate, onOpen, updater }) {
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState({ productionName: "", eventName: "", sport: "", date: new Date().toISOString().slice(0, 10) });
   return <main className="startup">
@@ -8,10 +8,10 @@ export default function Startup({ productions, onCreate, onOpen }) {
       <img src="/brand/studio/IconWordmarkStudio.png" alt="VERO Studio" />
       <h1>The production brain.</h1>
       <p>Build, connect, and direct a VERO production from one precise workspace.</p>
-      <small>VERO STUDIO · VERSION 0.1.0</small>
+      <small>VERO STUDIO · VERSION {updater.appVersion}</small>
     </section>
     <section className="startup-actions">
-      <header><p>PRODUCTION CONTROL</p><h2>{creating ? "New production" : "Ready when you are."}</h2></header>
+      <header><div><p>PRODUCTION CONTROL</p><h2>{creating ? "New production" : "Ready when you are."}</h2></div><div className={`startup-update update-${updater.update.status}`}><i />{updater.update.status === "downloading" ? `UPDATING · ${updater.update.detail}` : updater.update.status === "ready" ? "UPDATE READY" : ["checking", "initializing"].includes(updater.update.status) ? "CHECKING FOR UPDATES" : `VERSION ${updater.appVersion}`}</div></header>
       {creating ? <form onSubmit={(event) => { event.preventDefault(); onCreate(form); }}>
         <label>PRODUCTION NAME<input autoFocus required value={form.productionName} onChange={(event) => setForm({ ...form, productionName: event.target.value })} /></label>
         <label>EVENT NAME<input value={form.eventName} onChange={(event) => setForm({ ...form, eventName: event.target.value })} /></label>

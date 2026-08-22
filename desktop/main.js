@@ -10,6 +10,7 @@ const HOST = "127.0.0.1", PORT = 43120, ORIGIN = `http://${HOST}:${PORT}`;
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."), DIST = path.join(ROOT, "dist"), UPDATE_INTERVAL = 6 * 60 * 60 * 1000;
 const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml" };
 let server, mainWindow, updateTimer, downloadedUpdate;
+let updateState = { status: "initializing", detail: "Starting VERO Studio…", version: "" };
 
 async function serve(request, response) {
   const url = new URL(request.url, ORIGIN); let relative = decodeURIComponent(url.pathname).replace(/^\/+/, "");
@@ -27,7 +28,7 @@ function safeUpdateError(error) {
   if (/ENOTFOUND|ECONN|network|internet|timeout/i.test(message)) return "VERO Studio could not reach the update service. Check your internet connection and try again.";
   return "VERO Studio could not check for updates right now. Please try again later.";
 }
-function sendUpdateStatus(status, detail = "") { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("updates:status", { status, detail, version: downloadedUpdate?.version || "" }); }
+function sendUpdateStatus(status, detail = "") { updateState = { status, detail, version: downloadedUpdate?.version || "" }; if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("updates:status", updateState); }
 function configureUpdater() {
   const { autoUpdater } = updater; autoUpdater.autoDownload = true; autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.on("checking-for-update", () => sendUpdateStatus("checking"));
@@ -45,6 +46,7 @@ function createWindow() {
 }
 
 ipcMain.handle("updates:check", checkForUpdates);
+ipcMain.handle("updates:status", () => updateState);
 ipcMain.handle("updates:install", () => { if (!downloadedUpdate) return { ok: false, reason: "No update is ready." }; updater.autoUpdater.quitAndInstall(false, true); return { ok: true }; });
 if (!app.requestSingleInstanceLock()) app.quit(); else app.whenReady().then(async () => { await startServer(); configureUpdater(); Menu.setApplicationMenu(null); createWindow(); });
 app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });

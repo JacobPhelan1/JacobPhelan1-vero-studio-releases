@@ -7,9 +7,9 @@ import GraphicsPage from "./workspace/GraphicsPage";
 import SettingsPage from "./workspace/SettingsPage";
 
 const nav = ["Production", "Inputs", "Graphics", "Audio", "Connections", "Settings"];
-export default function Shell({ production, onProductionChange, onClose, controller }) {
+export default function Shell({ production, onProductionChange, onClose, controller, updater }) {
   const [page, setPage] = useState("Production");
-  const views = { Production: <ProductionWorkspace production={production} controller={controller} />, Inputs: <InputsPage controller={controller} />, Graphics: <GraphicsPage />, Audio: <AudioPage controller={controller} />, Connections: <ConnectionsPage controller={controller} />, Settings: <SettingsPage production={production} onProductionChange={onProductionChange} controller={controller} /> };
+  const views = { Production: <ProductionWorkspace production={production} controller={controller} />, Inputs: <InputsPage controller={controller} />, Graphics: <GraphicsPage />, Audio: <AudioPage controller={controller} />, Connections: <ConnectionsPage controller={controller} />, Settings: <SettingsPage production={production} onProductionChange={onProductionChange} controller={controller} updater={updater} /> };
   return <div className="app-shell">
     <aside>
       <header><img src="/brand/studio/IconWordmarkStudio.png" alt="VERO Studio" /></header>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import UpdatePanel from "./UpdatePanel";
 
-export default function SettingsPage({ production, onProductionChange, controller }) {
+export default function SettingsPage({ production, onProductionChange, controller, updater }) {
   const [draft, setDraft] = useState(controller.settings);
   const updateProduction = (field, value) => onProductionChange({ ...production, [field]: value });
   return <section className="panel-page settings">
@@ -19,6 +19,6 @@ export default function SettingsPage({ production, onProductionChange, controlle
       <button className="primary" onClick={() => controller.saveSettings(draft)}>SAVE CONNECTIONS</button>
     </article>
     <article><h3>Account</h3><p>No VERO Account backend is configured. Studio does not create a fake identity or store passwords.</p></article>
-    <UpdatePanel />
+    <UpdatePanel updater={updater} />
   </section>;
 }
