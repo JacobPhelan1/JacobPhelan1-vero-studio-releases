@@ -4,7 +4,7 @@ import http from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { createVmixProxy } from "./bridge.js";
+import { createStudioBridge } from "./studioBridge.js";
 
 const HOST = "127.0.0.1", PORT = 43120, ORIGIN = `http://${HOST}:${PORT}`;
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."), DIST = path.join(ROOT, "dist"), UPDATE_INTERVAL = 6 * 60 * 60 * 1000;
@@ -21,7 +21,7 @@ async function serve(request, response) {
   response.setHeader("Content-Type", mime[path.extname(filename)] || "application/octet-stream"); response.end(await readFile(filename));
 }
 
-function startServer() { const bridge = createVmixProxy({ bridgeUrl: ORIGIN }); server = http.createServer((request, response) => bridge(request, response, () => serve(request, response))); return new Promise((resolve, reject) => { server.once("error", reject); server.listen(PORT, HOST, resolve); }); }
+function startServer() { const bridge = createStudioBridge({ bridgeUrl: ORIGIN }); server = http.createServer((request, response) => bridge(request, response, () => serve(request, response))); return new Promise((resolve, reject) => { server.once("error", reject); server.listen(PORT, HOST, resolve); }); }
 function safeUpdateError(error) {
   const message = String(error?.message || error || "");
   if (/404|releases\.atom|authentication token/i.test(message)) return "The VERO Studio update channel is not available yet. The application can continue normally.";

@@ -14,9 +14,8 @@ export default function SettingsPage({ production, onProductionChange, controlle
     </article>
     <article>
       <h3>Connections</h3>
-      <label>LOCAL BRIDGE URL<input value={draft.bridgeUrl} onChange={(event) => setDraft({ ...draft, bridgeUrl: event.target.value })} /></label>
-      <label className="toggle-setting"><input type="checkbox" checked={draft.vmix.enabled} onChange={(event) => setDraft({ ...draft, vmix: { ...draft.vmix, enabled: event.target.checked } })} /><span><strong>ENABLE VMIX INTEGRATION</strong><small>Optional external switcher connection. Disabled by default.</small></span></label>
-      {draft.vmix.enabled&&<div><label>VMIX HOST<input value={draft.vmix.host} onChange={(event) => setDraft({ ...draft, vmix: { ...draft.vmix, host: event.target.value } })} /></label><label>VMIX PORT<input type="number" value={draft.vmix.port} onChange={(event) => setDraft({ ...draft, vmix: { ...draft.vmix, port: Number(event.target.value) } })} /></label></div>}
+      <label>STUDIO BRIDGE URL<input value={draft.bridgeUrl} onChange={(event) => setDraft({ ...draft, bridgeUrl: event.target.value })} /></label>
+      <label>VERO GFX BRIDGE URL<input value={draft.gfxBridgeUrl} onChange={(event) => setDraft({ ...draft, gfxBridgeUrl: event.target.value })} /></label>
       <button className="primary" onClick={() => controller.saveSettings(draft)}>SAVE CONNECTIONS</button>
     </article>
     <article><h3>Account</h3><p>No VERO Account backend is configured. Studio does not create a fake identity or store passwords.</p></article>
