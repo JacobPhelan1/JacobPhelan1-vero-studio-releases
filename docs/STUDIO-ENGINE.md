@@ -5,8 +5,9 @@ VERO Studio is the production environment. It does not depend on or connect to a
 ## Current native foundation
 
 - Persistent VERO productions with customizable native input definitions.
-- Automatic Windows camera/capture-card discovery through the media-device API, including USB, HDMI, and SDI hardware that registers as a camera.
-- Native device selection by stable device ID with optional paired capture-audio selection; camera inputs do not use URLs.
+- Automatic Windows local-video discovery through the media-device API.
+- Separate **Capture Device** and **Webcam** source types: known HDMI/SDI/capture-card hardware is classified as production capture, while integrated and USB webcams remain explicitly labeled webcams.
+- Native device selection by stable device ID with optional paired capture-audio selection; local video inputs do not use URLs.
 - Video, image, browser, color, and VERO GFX source types.
 - Persistent Preview and Program buses with intentional CUT and AUTO actions.
 - Basic per-input audio state for enabled channels.
