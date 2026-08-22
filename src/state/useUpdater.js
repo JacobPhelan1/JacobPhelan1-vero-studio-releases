@@ -16,8 +16,13 @@ export function useUpdater() {
   const check = useCallback(async () => {
     if (!desktop?.checkForUpdates) { setUpdate({ status: "development", detail: "Update checks are available in the installed desktop application.", version: "" }); return; }
     setUpdate({ status: "checking", detail: "Checking the VERO Studio release channel…", version: "" });
-    const result = await desktop.checkForUpdates();
-    if (!result?.ok) setUpdate({ status: result?.status || "error", detail: result?.reason || "The update service is currently unavailable.", version: "" });
+    try {
+      const result = await desktop.checkForUpdates();
+      if (result?.status) setUpdate({ status: result.status, detail: result.detail || result.reason || "Update check completed.", version: result.version || "" });
+      else if (!result?.ok) setUpdate({ status: "error", detail: result?.reason || "The update service is currently unavailable.", version: "" });
+    } catch (error) {
+      setUpdate({ status: "error", detail: error?.message || "The update check could not be completed.", version: "" });
+    }
   }, [desktop]);
 
   const install = useCallback(async () => {

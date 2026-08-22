@@ -23,7 +23,23 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - run: npm run desktop:icon
-      - name: Build and publish installer
-        run: npx electron-builder --win nsis --publish always
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build installer and update metadata
+        run: npx electron-builder --win nsis --publish never
+      - name: Verify update artifacts
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem release/VERO-Studio-Setup-*.exe | Select-Object -First 1
+          $blockmap = Get-ChildItem release/VERO-Studio-Setup-*.exe.blockmap | Select-Object -First 1
+          $metadata = Get-Item release/latest.yml -ErrorAction SilentlyContinue
+          if (-not $installer -or -not $blockmap -or -not $metadata) {
+            Get-ChildItem release | Format-Table Name, Length
+            throw "Release is incomplete. Installer, blockmap, and latest.yml are required."
+          }
+      - name: Publish complete update feed
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            release/VERO-Studio-Setup-*.exe
+            release/VERO-Studio-Setup-*.exe.blockmap
+            release/latest.yml

@@ -9,7 +9,7 @@ import { createStudioBridge } from "./studioBridge.js";
 const HOST = "127.0.0.1", PORT = 43120, ORIGIN = `http://${HOST}:${PORT}`;
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."), DIST = path.join(ROOT, "dist"), UPDATE_INTERVAL = 6 * 60 * 60 * 1000;
 const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml" };
-let server, mainWindow, updateTimer, downloadedUpdate;
+let server, mainWindow, updateTimer, downloadedUpdate, activeUpdateCheck;
 let updateState = { status: "initializing", detail: "Starting VERO Studio…", version: "" };
 
 async function serve(request, response) {
@@ -38,7 +38,7 @@ function configureUpdater() {
   autoUpdater.on("update-downloaded", (info) => { downloadedUpdate = info; sendUpdateStatus("ready", `VERO Studio ${info.version} is ready to install.`); });
   autoUpdater.on("error", (error) => sendUpdateStatus("error", safeUpdateError(error)));
 }
-async function checkForUpdates() { if (!app.isPackaged) return { ok: false, status: "development", reason: "Update checks are available in installed builds." }; try { await updater.autoUpdater.checkForUpdates(); return { ok: true, status: "checking" }; } catch (error) { const reason = safeUpdateError(error); sendUpdateStatus("error", reason); return { ok: false, status: "error", reason }; } }
+async function checkForUpdates() { if (!app.isPackaged) return { ok: false, status: "development", reason: "Update checks are available in installed builds." };if(activeUpdateCheck)return activeUpdateCheck;activeUpdateCheck=(async()=>{try{sendUpdateStatus("checking","Checking the VERO Studio release channel…");await updater.autoUpdater.checkForUpdates();return{ok:updateState.status!=="error",...updateState};}catch(error){const reason=safeUpdateError(error);sendUpdateStatus("error",reason);return{ok:false,status:"error",detail:reason,reason};}finally{activeUpdateCheck=null;}})();return activeUpdateCheck;}
 function createWindow() {
   mainWindow = new BrowserWindow({ width: 1600, height: 1000, minWidth: 1080, minHeight: 700, backgroundColor: "#070b0f", title: "VERO Studio", autoHideMenuBar: true, icon: path.join(ROOT, "public", "brand", "studio", "IconStudio.png"), webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, preload: path.join(ROOT, "desktop", "preload.cjs"), additionalArguments: [`--vero-app-version=${app.getVersion()}`] } });
   mainWindow.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:\/\//i.test(url)) shell.openExternal(url); return { action: "deny" }; });
