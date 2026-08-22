@@ -30,12 +30,12 @@ function safeUpdateError(error) {
 }
 function sendUpdateStatus(status, detail = "") { updateState = { status, detail, version: downloadedUpdate?.version || "" }; if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("updates:status", updateState); }
 function configureUpdater() {
-  const { autoUpdater } = updater; autoUpdater.autoDownload = true; autoUpdater.autoInstallOnAppQuit = true;
+  const { autoUpdater } = updater; autoUpdater.autoDownload = true; autoUpdater.autoInstallOnAppQuit = true; autoUpdater.autoRunAppAfterInstall = true;
   autoUpdater.on("checking-for-update", () => sendUpdateStatus("checking"));
   autoUpdater.on("update-available", (info) => sendUpdateStatus("downloading", `VERO Studio ${info.version}`));
   autoUpdater.on("update-not-available", () => sendUpdateStatus("current", `VERO Studio ${app.getVersion()} is current.`));
   autoUpdater.on("download-progress", (progress) => sendUpdateStatus("downloading", `${Math.round(progress.percent)}%`));
-  autoUpdater.on("update-downloaded", (info) => { downloadedUpdate = info; sendUpdateStatus("ready", `VERO Studio ${info.version} is ready to install.`); });
+  autoUpdater.on("update-downloaded", (info) => { downloadedUpdate = info; sendUpdateStatus("ready", `VERO Studio ${info.version} will apply automatically when Studio closes.`); });
   autoUpdater.on("error", (error) => sendUpdateStatus("error", safeUpdateError(error)));
 }
 async function checkForUpdates() { if (!app.isPackaged) return { ok: false, status: "development", reason: "Update checks are available in installed builds." };if(activeUpdateCheck)return activeUpdateCheck;activeUpdateCheck=(async()=>{try{sendUpdateStatus("checking","Checking the VERO Studio release channel…");await updater.autoUpdater.checkForUpdates();return{ok:updateState.status!=="error",...updateState};}catch(error){const reason=safeUpdateError(error);sendUpdateStatus("error",reason);return{ok:false,status:"error",detail:reason,reason};}finally{activeUpdateCheck=null;}})();return activeUpdateCheck;}
@@ -47,7 +47,7 @@ function createWindow() {
 
 ipcMain.handle("updates:check", checkForUpdates);
 ipcMain.handle("updates:status", () => updateState);
-ipcMain.handle("updates:install", () => { if (!downloadedUpdate) return { ok: false, reason: "No update is ready." }; updater.autoUpdater.quitAndInstall(false, true); return { ok: true }; });
+ipcMain.handle("updates:install", () => { if (!downloadedUpdate) return { ok: false, reason: "No update is ready." }; updater.autoUpdater.quitAndInstall(true, true); return { ok: true }; });
 if (!app.requestSingleInstanceLock()) app.quit(); else app.whenReady().then(async () => { await startServer(); configureUpdater(); Menu.setApplicationMenu(null); createWindow(); });
 app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
 app.on("before-quit", () => { clearInterval(updateTimer); server?.close(); });

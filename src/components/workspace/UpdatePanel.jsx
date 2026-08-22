@@ -5,6 +5,6 @@ export default function UpdatePanel({ updater }) {
   return <article className={`update-panel update-${update.status}`}>
     <div className="update-heading"><div><h3>Updates</h3><p>VERO Studio {updater.appVersion}</p></div><span>{LABELS[update.status] || "UPDATE"}</span></div>
     <p>{update.detail}</p>
-    {update.status === "ready" ? <button className="primary" onClick={updater.install}>RESTART AND INSTALL</button> : <button disabled={["initializing", "checking", "downloading"].includes(update.status)} onClick={updater.check}>{update.status === "checking" ? "CHECKING…" : "CHECK FOR UPDATES"}</button>}
+    {update.status === "ready" ? <button className="primary" onClick={updater.install}>RESTART TO UPDATE</button> : <button disabled={["initializing", "checking", "downloading"].includes(update.status)} onClick={updater.check}>{update.status === "checking" ? "CHECKING…" : "CHECK FOR UPDATES"}</button>}
   </article>;
 }

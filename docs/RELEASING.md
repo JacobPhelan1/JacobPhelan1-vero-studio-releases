@@ -1,6 +1,6 @@
 # Releasing VERO Studio
 
-Installed builds check `JacobPhelan1/JacobPhelan1-vero-studio-releases` at startup, every six hours, and from **Check for Updates**. New releases download automatically and install on normal app exit or when the operator requests installation.
+Installed builds check `JacobPhelan1/JacobPhelan1-vero-studio-releases` at startup, every six hours, and from **Check for Updates**. New releases download automatically and apply silently on normal app exit or when the operator chooses **Restart to Update**. The standalone installer is only for first installation or recovery.
 
 ## One-time GitHub setup
 
