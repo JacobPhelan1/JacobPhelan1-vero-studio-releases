@@ -1,7 +1,7 @@
 export const PRODUCTION_SCHEMA_VERSION = 2;
 const id=()=>crypto.randomUUID();
 export const defaultInputs=()=>[
-  {id:id(),name:"Camera 1",type:"camera",source:"",color:"#102832",audio:{enabled:true,muted:false,volume:100}},
+  {id:id(),name:"Camera 1",type:"camera",source:"",audioSource:"",color:"#102832",audio:{enabled:false,muted:false,volume:100}},
   {id:id(),name:"Media 1",type:"video",source:"",color:"#14202a",audio:{enabled:true,muted:false,volume:100}},
   {id:id(),name:"Browser 1",type:"browser",source:"",color:"#17232d",audio:{enabled:false,muted:true,volume:100}},
   {id:id(),name:"VERO GFX",type:"gfx",source:"http://127.0.0.1:43110",color:"#063743",audio:{enabled:false,muted:true,volume:100}},

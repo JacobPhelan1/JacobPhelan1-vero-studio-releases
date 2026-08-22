@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, shell } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, session, shell } from "electron";
 import updater from "electron-updater";
 import http from "node:http";
 import { readFile, stat } from "node:fs/promises";
@@ -22,6 +22,7 @@ async function serve(request, response) {
 }
 
 function startServer() { const bridge = createStudioBridge({ bridgeUrl: ORIGIN }); server = http.createServer((request, response) => bridge(request, response, () => serve(request, response))); return new Promise((resolve, reject) => { server.once("error", reject); server.listen(PORT, HOST, resolve); }); }
+function isStudioOrigin(value) { try { return new URL(value).origin === ORIGIN; } catch { return false; } }
 function safeUpdateError(error) {
   const message = String(error?.message || error || "");
   if (/404|releases\.atom|authentication token/i.test(message)) return "The VERO Studio update channel is not available yet. The application can continue normally.";
@@ -40,6 +41,8 @@ function configureUpdater() {
 }
 async function checkForUpdates() { if (!app.isPackaged) return { ok: false, status: "development", reason: "Update checks are available in installed builds." };if(activeUpdateCheck)return activeUpdateCheck;activeUpdateCheck=(async()=>{try{sendUpdateStatus("checking","Checking the VERO Studio release channel…");await updater.autoUpdater.checkForUpdates();return{ok:updateState.status!=="error",...updateState};}catch(error){const reason=safeUpdateError(error);sendUpdateStatus("error",reason);return{ok:false,status:"error",detail:reason,reason};}finally{activeUpdateCheck=null;}})();return activeUpdateCheck;}
 function createWindow() {
+  session.defaultSession.setPermissionCheckHandler((_webContents, permission, requestingOrigin) => permission === "media" && isStudioOrigin(requestingOrigin));
+  session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback, details) => callback(permission === "media" && isStudioOrigin(details.requestingUrl)));
   mainWindow = new BrowserWindow({ width: 1600, height: 1000, minWidth: 1080, minHeight: 700, backgroundColor: "#070b0f", title: "VERO Studio", autoHideMenuBar: true, icon: path.join(ROOT, "public", "brand", "studio", "IconStudio.png"), webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, preload: path.join(ROOT, "desktop", "preload.cjs"), additionalArguments: [`--vero-app-version=${app.getVersion()}`] } });
   mainWindow.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:\/\//i.test(url)) shell.openExternal(url); return { action: "deny" }; });
   mainWindow.loadURL(ORIGIN); mainWindow.webContents.once("did-finish-load", () => { setTimeout(checkForUpdates, 8000); clearInterval(updateTimer); updateTimer = setInterval(checkForUpdates, UPDATE_INTERVAL); });
