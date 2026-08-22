@@ -1,0 +1,1 @@
+export const APP_CONFIG = Object.freeze({ applicationId: "vero.studio", applicationType: "studio", version: "0.1.0", defaultBridgeUrl: "http://127.0.0.1:5173", vmix: { host: "127.0.0.1", port: 8088, pollIntervalMs: 2500, timeoutMs: 5000 }, endpoints: { account: "", updates: "" } });

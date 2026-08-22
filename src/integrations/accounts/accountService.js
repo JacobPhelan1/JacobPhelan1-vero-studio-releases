@@ -1,0 +1,1 @@
+export const accountService={get status(){return "Not Configured";},get session(){return null;},async signIn(){throw new Error("VERO Account backend is not configured. No local credentials were created.");},async signOut(){return {ok:true};}};

@@ -1,0 +1,47 @@
+{
+  "name": "vero-studio",
+  "productName": "VERO Studio",
+  "description": "VERO Studio live broadcast production control application.",
+  "author": "VERO Broadcasting, LLC",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "desktop/main.js",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "lint": "eslint .",
+    "test": "node --test",
+    "desktop:start": "npm run build && electron .",
+    "desktop:icon": "node scripts/generate-desktop-icon.mjs",
+    "desktop:package": "npm run build && npm run desktop:icon && electron-builder --win nsis",
+    "release": "npm run test && npm run lint && npm run build && npm run desktop:icon && electron-builder --win nsis --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.9",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@vitejs/plugin-react": "^5.1.1",
+    "electron": "^39.2.3",
+    "electron-builder": "^26.0.12",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "png-to-ico": "^3.0.1",
+    "vite": "^7.2.4"
+  },
+  "build": {
+    "appId": "com.verobroadcasting.verostudio",
+    "productName": "VERO Studio",
+    "asar": true,
+    "directories": { "output": "release" },
+    "files": ["dist/**/*", "desktop/**/*", "package.json"],
+    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }], "icon": "build/VERO-Studio.ico", "artifactName": "VERO-Studio-Setup-${version}.${ext}" },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true, "createStartMenuShortcut": true, "shortcutName": "VERO Studio", "installerIcon": "build/VERO-Studio.ico", "uninstallerIcon": "build/VERO-Studio.ico" },
+    "publish": { "provider": "github", "owner": "JacobPhelan1", "repo": "vero-studio-releases", "releaseType": "release" }
+  }
+}

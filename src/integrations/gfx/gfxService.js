@@ -1,0 +1,1 @@
+export const gfxService={getSnapshot(){return{applicationId:"vero.gfx",applicationType:"gfx",connectionState:"Integration Pending",capabilities:[]};},async trigger(){return{ok:false,error:"VERO GFX discovery and authenticated command transport are not available yet."};}};
