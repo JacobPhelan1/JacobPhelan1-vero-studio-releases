@@ -70,7 +70,7 @@
     "publish": {
       "provider": "github",
       "owner": "JacobPhelan1",
-      "repo": "vero-studio-releases",
+      "repo": "JacobPhelan1-vero-studio-releases",
       "releaseType": "release"
     }
   }
