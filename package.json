@@ -3,7 +3,7 @@
   "productName": "VERO Studio",
   "description": "VERO Studio live broadcast production control application.",
   "author": "VERO Broadcasting, LLC",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "private": true,
   "type": "module",
   "main": "desktop/main.js",
