@@ -1,7 +1,8 @@
 const { contextBridge, ipcRenderer } = require("electron");
+const appVersionArgument = process.argv.find((value) => value.startsWith("--vero-app-version="));
 contextBridge.exposeInMainWorld("veroDesktop", {
   bridgeUrl: "http://127.0.0.1:43120",
-  appVersion: process.env.npm_package_version || "0.1.0",
+  appVersion: appVersionArgument?.slice("--vero-app-version=".length) || "0.1.0",
   checkForUpdates: () => ipcRenderer.invoke("updates:check"),
   installUpdate: () => ipcRenderer.invoke("updates:install"),
   onUpdateStatus: (listener) => {

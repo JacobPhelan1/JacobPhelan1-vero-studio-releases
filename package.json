@@ -3,7 +3,7 @@
   "productName": "VERO Studio",
   "description": "VERO Studio live broadcast production control application.",
   "author": "VERO Broadcasting, LLC",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "main": "desktop/main.js",
@@ -38,10 +38,40 @@
     "appId": "com.verobroadcasting.verostudio",
     "productName": "VERO Studio",
     "asar": true,
-    "directories": { "output": "release" },
-    "files": ["dist/**/*", "desktop/**/*", "package.json"],
-    "win": { "target": [{ "target": "nsis", "arch": ["x64"] }], "icon": "build/VERO-Studio.ico", "artifactName": "VERO-Studio-Setup-${version}.${ext}" },
-    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true, "createDesktopShortcut": true, "createStartMenuShortcut": true, "shortcutName": "VERO Studio", "installerIcon": "build/VERO-Studio.ico", "uninstallerIcon": "build/VERO-Studio.ico" },
-    "publish": { "provider": "github", "owner": "JacobPhelan1", "repo": "vero-studio-releases", "releaseType": "release" }
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "desktop/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/VERO-Studio.ico",
+      "artifactName": "VERO-Studio-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "VERO Studio",
+      "installerIcon": "build/VERO-Studio.ico",
+      "uninstallerIcon": "build/VERO-Studio.ico"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "JacobPhelan1",
+      "repo": "vero-studio-releases",
+      "releaseType": "release"
+    }
   }
 }

@@ -1,2 +1,24 @@
-import{useState}from"react";
-export default function SettingsPage({production,onProductionChange,controller}){const[draft,setDraft]=useState(controller.settings);const updateProduction=(field,value)=>onProductionChange({...production,[field]:value});return <section className="panel-page settings"><header><p>APPLICATION</p><h2>Settings</h2><span>Functional configuration only</span></header><article><h3>Production</h3><label>PRODUCTION NAME<input value={production.productionName} onChange={e=>updateProduction("productionName",e.target.value)}/></label><label>EVENT NAME<input value={production.eventName} onChange={e=>updateProduction("eventName",e.target.value)}/></label><div><label>SPORT<input value={production.sport} onChange={e=>updateProduction("sport",e.target.value)}/></label><label>VENUE<input value={production.venue} onChange={e=>updateProduction("venue",e.target.value)}/></label></div></article><article><h3>Connections</h3><label>LOCAL BRIDGE URL<input value={draft.bridgeUrl} onChange={e=>setDraft({...draft,bridgeUrl:e.target.value})}/></label><div><label>VMIX HOST<input value={draft.vmix.host} onChange={e=>setDraft({...draft,vmix:{...draft.vmix,host:e.target.value}})}/></label><label>VMIX PORT<input type="number" value={draft.vmix.port} onChange={e=>setDraft({...draft,vmix:{...draft.vmix,port:Number(e.target.value)}})}/></label></div><button className="primary" onClick={()=>controller.saveSettings(draft)}>SAVE CONNECTIONS</button></article><article><h3>Account</h3><p>No VERO Account backend is configured. Studio does not create a fake identity or store passwords.</p></article><article><h3>Updates</h3><p>Update checks are available only in installed builds after a signed update provider is configured.</p><button onClick={async()=>alert((await window.veroDesktop?.checkForUpdates?.())?.reason||"Update check started.")}>CHECK FOR UPDATES</button></article></section>}
+import { useState } from "react";
+import UpdatePanel from "./UpdatePanel";
+
+export default function SettingsPage({ production, onProductionChange, controller }) {
+  const [draft, setDraft] = useState(controller.settings);
+  const updateProduction = (field, value) => onProductionChange({ ...production, [field]: value });
+  return <section className="panel-page settings">
+    <header><p>APPLICATION</p><h2>Settings</h2><span>Functional configuration only</span></header>
+    <article>
+      <h3>Production</h3>
+      <label>PRODUCTION NAME<input value={production.productionName} onChange={(event) => updateProduction("productionName", event.target.value)} /></label>
+      <label>EVENT NAME<input value={production.eventName} onChange={(event) => updateProduction("eventName", event.target.value)} /></label>
+      <div><label>SPORT<input value={production.sport} onChange={(event) => updateProduction("sport", event.target.value)} /></label><label>VENUE<input value={production.venue} onChange={(event) => updateProduction("venue", event.target.value)} /></label></div>
+    </article>
+    <article>
+      <h3>Connections</h3>
+      <label>LOCAL BRIDGE URL<input value={draft.bridgeUrl} onChange={(event) => setDraft({ ...draft, bridgeUrl: event.target.value })} /></label>
+      <div><label>VMIX HOST<input value={draft.vmix.host} onChange={(event) => setDraft({ ...draft, vmix: { ...draft.vmix, host: event.target.value } })} /></label><label>VMIX PORT<input type="number" value={draft.vmix.port} onChange={(event) => setDraft({ ...draft, vmix: { ...draft.vmix, port: Number(event.target.value) } })} /></label></div>
+      <button className="primary" onClick={() => controller.saveSettings(draft)}>SAVE CONNECTIONS</button>
+    </article>
+    <article><h3>Account</h3><p>No VERO Account backend is configured. Studio does not create a fake identity or store passwords.</p></article>
+    <UpdatePanel />
+  </section>;
+}

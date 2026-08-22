@@ -1,6 +1,7 @@
 node_modules/
 dist/
 release/
+VERO-Studio-Setup-*.exe
 *.log
 .env
 .env.*

@@ -21,6 +21,12 @@ async function serve(request, response) {
 }
 
 function startServer() { const bridge = createVmixProxy({ bridgeUrl: ORIGIN }); server = http.createServer((request, response) => bridge(request, response, () => serve(request, response))); return new Promise((resolve, reject) => { server.once("error", reject); server.listen(PORT, HOST, resolve); }); }
+function safeUpdateError(error) {
+  const message = String(error?.message || error || "");
+  if (/404|releases\.atom|authentication token/i.test(message)) return "The VERO Studio update channel is not available yet. The application can continue normally.";
+  if (/ENOTFOUND|ECONN|network|internet|timeout/i.test(message)) return "VERO Studio could not reach the update service. Check your internet connection and try again.";
+  return "VERO Studio could not check for updates right now. Please try again later.";
+}
 function sendUpdateStatus(status, detail = "") { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("updates:status", { status, detail, version: downloadedUpdate?.version || "" }); }
 function configureUpdater() {
   const { autoUpdater } = updater; autoUpdater.autoDownload = true; autoUpdater.autoInstallOnAppQuit = true;
@@ -29,11 +35,11 @@ function configureUpdater() {
   autoUpdater.on("update-not-available", () => sendUpdateStatus("current", `VERO Studio ${app.getVersion()} is current.`));
   autoUpdater.on("download-progress", (progress) => sendUpdateStatus("downloading", `${Math.round(progress.percent)}%`));
   autoUpdater.on("update-downloaded", (info) => { downloadedUpdate = info; sendUpdateStatus("ready", `VERO Studio ${info.version} is ready to install.`); });
-  autoUpdater.on("error", (error) => sendUpdateStatus("error", error.message));
+  autoUpdater.on("error", (error) => sendUpdateStatus("error", safeUpdateError(error)));
 }
-async function checkForUpdates() { if (!app.isPackaged) return { ok: false, reason: "Update checks are available in installed builds." }; try { await updater.autoUpdater.checkForUpdates(); return { ok: true }; } catch (error) { sendUpdateStatus("error", error.message); return { ok: false, reason: error.message }; } }
+async function checkForUpdates() { if (!app.isPackaged) return { ok: false, status: "development", reason: "Update checks are available in installed builds." }; try { await updater.autoUpdater.checkForUpdates(); return { ok: true, status: "checking" }; } catch (error) { const reason = safeUpdateError(error); sendUpdateStatus("error", reason); return { ok: false, status: "error", reason }; } }
 function createWindow() {
-  mainWindow = new BrowserWindow({ width: 1600, height: 1000, minWidth: 1080, minHeight: 700, backgroundColor: "#070b0f", title: "VERO Studio", autoHideMenuBar: true, icon: path.join(ROOT, "public", "brand", "studio", "IconStudio.png"), webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, preload: path.join(ROOT, "desktop", "preload.cjs") } });
+  mainWindow = new BrowserWindow({ width: 1600, height: 1000, minWidth: 1080, minHeight: 700, backgroundColor: "#070b0f", title: "VERO Studio", autoHideMenuBar: true, icon: path.join(ROOT, "public", "brand", "studio", "IconStudio.png"), webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, preload: path.join(ROOT, "desktop", "preload.cjs"), additionalArguments: [`--vero-app-version=${app.getVersion()}`] } });
   mainWindow.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:\/\//i.test(url)) shell.openExternal(url); return { action: "deny" }; });
   mainWindow.loadURL(ORIGIN); mainWindow.webContents.once("did-finish-load", () => { setTimeout(checkForUpdates, 8000); clearInterval(updateTimer); updateTimer = setInterval(checkForUpdates, UPDATE_INTERVAL); });
 }
