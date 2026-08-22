@@ -1,6 +1,7 @@
-import { app, BrowserWindow, ipcMain, Menu, session, shell } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, Menu, session, shell } from "electron";
 import updater from "electron-updater";
 import http from "node:http";
+import { createReadStream } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -8,12 +9,13 @@ import { createStudioBridge } from "./studioBridge.js";
 
 const HOST = "127.0.0.1", PORT = 43120, ORIGIN = `http://${HOST}:${PORT}`;
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."), DIST = path.join(ROOT, "dist"), UPDATE_INTERVAL = 6 * 60 * 60 * 1000;
-const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml" };
+const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".webp": "image/webp", ".svg": "image/svg+xml", ".mp4": "video/mp4", ".mov": "video/quicktime", ".mkv": "video/x-matroska", ".webm": "video/webm", ".mp3": "audio/mpeg", ".wav": "audio/wav", ".m4a": "audio/mp4", ".flac": "audio/flac" };
 let server, mainWindow, updateTimer, downloadedUpdate, activeUpdateCheck;
 let updateState = { status: "initializing", detail: "Starting VERO Studio…", version: "" };
 
 async function serve(request, response) {
   const url = new URL(request.url, ORIGIN); let relative = decodeURIComponent(url.pathname).replace(/^\/+/, "");
+  if (url.pathname === "/__vero/media/local") { const filename=url.searchParams.get("path");if(!filename||!path.isAbsolute(filename)){response.statusCode=400;response.end("Invalid media path.");return;}try{const info=await stat(filename);if(!info.isFile())throw new Error("Not a file");const range=request.headers.range;response.setHeader("Accept-Ranges","bytes");response.setHeader("Content-Type",mime[path.extname(filename).toLowerCase()]||"application/octet-stream");if(range){const match=/bytes=(\d*)-(\d*)/.exec(range),start=Number(match?.[1]||0),end=Math.min(Number(match?.[2]||info.size-1),info.size-1);if(start>end||start>=info.size){response.statusCode=416;response.setHeader("Content-Range",`bytes */${info.size}`);response.end();return;}response.statusCode=206;response.setHeader("Content-Range",`bytes ${start}-${end}/${info.size}`);response.setHeader("Content-Length",end-start+1);createReadStream(filename,{start,end}).pipe(response);}else{response.setHeader("Content-Length",info.size);createReadStream(filename).pipe(response);}return;}catch{response.statusCode=404;response.end("Media file unavailable.");return;} }
   if (!relative || !path.extname(relative)) relative = "index.html";
   let filename = path.resolve(DIST, relative);
   if (path.relative(DIST, filename).startsWith("..")) { response.statusCode = 403; response.end(); return; }
@@ -51,6 +53,7 @@ function createWindow() {
 ipcMain.handle("updates:check", checkForUpdates);
 ipcMain.handle("updates:status", () => updateState);
 ipcMain.handle("updates:install", () => { if (!downloadedUpdate) return { ok: false, reason: "No update is ready." }; updater.autoUpdater.quitAndInstall(true, true); return { ok: true }; });
+ipcMain.handle("media:choose", async (_event, kind) => { const filters=kind==="image"?[{name:"Images",extensions:["png","jpg","jpeg","gif","webp","bmp"]}]:kind==="audio"?[{name:"Audio",extensions:["mp3","wav","m4a","flac","aac"]}]:[{name:"Video",extensions:["mp4","mov","mkv","webm","avi","m4v"]}];const result=await dialog.showOpenDialog(mainWindow,{title:`Select ${kind||"media"} input`,properties:["openFile"],filters});if(result.canceled||!result.filePaths[0])return{ok:false,canceled:true};const selected=result.filePaths[0];return{ok:true,path:selected,name:path.basename(selected)};});
 if (!app.requestSingleInstanceLock()) app.quit(); else app.whenReady().then(async () => { await startServer(); configureUpdater(); Menu.setApplicationMenu(null); createWindow(); });
 app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
 app.on("before-quit", () => { clearInterval(updateTimer); server?.close(); });

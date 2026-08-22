@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld("veroDesktop", {
   checkForUpdates: () => ipcRenderer.invoke("updates:check"),
   getUpdateStatus: () => ipcRenderer.invoke("updates:status"),
   installUpdate: () => ipcRenderer.invoke("updates:install"),
+  chooseMediaFile: (kind) => ipcRenderer.invoke("media:choose", kind),
   onUpdateStatus: (listener) => {
     const handler = (_event, value) => listener(value);
     ipcRenderer.on("updates:status", handler);
