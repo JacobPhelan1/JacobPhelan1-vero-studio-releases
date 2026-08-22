@@ -13,3 +13,4 @@ Thumbs.db
 *.cer
 *.key
 *.pem
+certificates/private/

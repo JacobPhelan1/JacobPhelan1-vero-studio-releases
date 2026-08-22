@@ -16,3 +16,7 @@ Installed builds check `JacobPhelan1/JacobPhelan1-vero-studio-releases` at start
 4. Existing installations detect the higher semantic version and download it automatically.
 
 Never reuse a version number or publish when tests, lint, or the production build fail.
+
+## Free trusted test build
+
+For development machines controlled by VERO, run `npm run desktop:package:trusted-test`. This creates a non-exportable self-signed development key in the current Windows user's certificate store and signs the installer. Install `release/VERO-Studio-Development.cer` once into the current user's **Trusted Root Certification Authorities** and **Trusted Publishers** stores before running the installer. This is suitable only for private development and testing. It does not replace public code signing and should never be represented as publicly trusted.

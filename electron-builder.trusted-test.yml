@@ -1,0 +1,27 @@
+appId: com.verobroadcasting.verostudio
+productName: VERO Studio
+asar: true
+directories:
+  output: release
+files:
+  - dist/**/*
+  - desktop/**/*
+  - package.json
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: build/VERO-Studio.ico
+  artifactName: VERO-Studio-Setup-${version}.${ext}
+  signtoolOptions:
+    certificateSubjectName: VERO Broadcasting LLC
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: VERO Studio
+  installerIcon: build/VERO-Studio.ico
+  uninstallerIcon: build/VERO-Studio.ico
+publish: null

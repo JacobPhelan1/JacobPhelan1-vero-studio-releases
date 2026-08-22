@@ -1,0 +1,25 @@
+import forge from "node-forge";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { randomBytes } from "node:crypto";
+
+const directory = path.resolve("release", ".signing");
+await mkdir(directory, { recursive: true });
+const keys = forge.pki.rsa.generateKeyPair(3072);
+const certificate = forge.pki.createCertificate();
+certificate.publicKey = keys.publicKey;
+certificate.serialNumber = randomBytes(16).toString("hex");
+certificate.validity.notBefore = new Date(Date.now() - 86400000);
+certificate.validity.notAfter = new Date(Date.now() + 2 * 365 * 86400000);
+const attributes = [{ name: "commonName", value: "VERO Broadcasting LLC" }, { name: "organizationName", value: "VERO Broadcasting LLC" }, { name: "countryName", value: "US" }];
+certificate.setSubject(attributes);
+certificate.setIssuer(attributes);
+certificate.setExtensions([{ name: "basicConstraints", cA: true }, { name: "keyUsage", digitalSignature: true, keyCertSign: true }, { name: "extKeyUsage", codeSigning: true }, { name: "subjectKeyIdentifier" }]);
+certificate.sign(keys.privateKey, forge.md.sha256.create());
+const password = randomBytes(32).toString("base64url");
+const pfxPath = path.join(directory, "VERO-Studio-Development.pfx");
+const certificatePath = path.resolve("release", "VERO-Studio-Development.cer");
+const p12 = forge.pkcs12.toPkcs12Asn1(keys.privateKey, certificate, password, { algorithm: "3des" });
+await writeFile(pfxPath, Buffer.from(forge.asn1.toDer(p12).getBytes(), "binary"));
+await writeFile(certificatePath, Buffer.from(forge.asn1.toDer(forge.pki.certificateToAsn1(certificate)).getBytes(), "binary"));
+process.stdout.write(JSON.stringify({ pfx: pfxPath, certificate: certificatePath, password }));
