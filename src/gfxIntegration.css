@@ -1,0 +1,23 @@
+.health .warn { color:#e6c66f; background:#241f10; border-color:#66551f; }
+.gfx-summary { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+.gfx-summary > div { padding:16px 18px; background:#0d1319; border:1px solid #202a33; border-left:3px solid #44d681; }
+.gfx-summary.warning > div:last-child { border-left-color:#d6ad43; }
+.gfx-summary p { margin:0 0 7px; color:#56d9ef; font-size:8px; font-weight:900; letter-spacing:.15em; }
+.gfx-summary strong,.gfx-summary small { display:block; }
+.gfx-summary strong { color:#fff; font-size:14px; }
+.gfx-summary small { margin-top:5px; color:#73808c; font-size:9px; }
+.graphics-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px; }
+.graphic-control { padding:16px; background:#0d1319; border:1px solid #202a33; }
+.graphic-control.active { border-color:#44d681; box-shadow:inset 0 3px #44d681; }
+.graphic-control header { display:flex; justify-content:space-between; gap:12px; }
+.graphic-control h3 { margin:5px 0 0; color:#fff; font-size:14px; }
+.graphic-control header p { margin:0; color:#73808c; font-size:7px; font-weight:900; letter-spacing:.14em; }
+.graphic-control header span { height:max-content; padding:5px 7px; border:1px solid #4c252a; color:#bd7980; background:#211316; font-size:7px; font-weight:900; letter-spacing:.08em; }
+.graphic-control header span.ready { color:#65d897; background:#10231a; border-color:#235c3a; }
+.graphic-control header span.live { color:#fff; background:#ba303b; border-color:#ed4b56; }
+.graphic-control dl { display:flex; gap:25px; margin:18px 0; padding-top:13px; border-top:1px solid #202a33; }
+.graphic-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.graphic-actions button { padding:11px; background:#141c23; border:1px solid #34414b; font-size:8px; font-weight:900; letter-spacing:.12em; }
+.graphic-actions .take { color:#061014; background:#56d9ef; border-color:#56d9ef; }
+.connection-card dl { flex-wrap:wrap; }
+@media(max-width:1250px){.gfx-summary{grid-template-columns:1fr}}

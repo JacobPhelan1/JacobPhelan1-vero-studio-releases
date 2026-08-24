@@ -1,1 +1,1 @@
-export const APP_CONFIG = Object.freeze({ applicationId: "vero.studio", applicationType: "studio", version: "0.2.0", defaultBridgeUrl: "http://127.0.0.1:43120", gfxBridgeUrl: "http://127.0.0.1:43110", discoveryIntervalMs: 5000, endpoints: { account: "", updates: "" } });
+export const APP_CONFIG = Object.freeze({ applicationId: "vero.studio", applicationType: "studio", version: "0.2.6", defaultBridgeUrl: "http://127.0.0.1:43120", gfxBridgeUrl: "http://127.0.0.1:43110", discoveryIntervalMs: 5000, gfxEventIntervalMs: 1250, endpoints: { account: "", updates: "" } });

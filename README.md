@@ -16,4 +16,4 @@ npm run desktop:package
 
 Studio remains usable while VERO GFX, accounts, Replay, and Audio services are offline. Unsupported engine features stay explicitly unavailable.
 
-The Windows installer is emitted to `release/VERO-Studio-Setup-<version>.exe`. See [docs/STUDIO-ENGINE.md](docs/STUDIO-ENGINE.md) for architecture and [docs/RELEASING.md](docs/RELEASING.md) for the GitHub Releases auto-update workflow.
+The Windows installer is emitted to `release/VERO-Studio-Setup-<version>.exe`. See [docs/STUDIO-ENGINE.md](docs/STUDIO-ENGINE.md) for architecture, [docs/GFX-INTEGRATION.md](docs/GFX-INTEGRATION.md) for the GFX Protocol V1 connection, and [docs/RELEASING.md](docs/RELEASING.md) for the GitHub Releases auto-update workflow.
