@@ -23,7 +23,7 @@ async function serve(request, response) {
   response.setHeader("Content-Type", mime[path.extname(filename)] || "application/octet-stream"); response.end(await readFile(filename));
 }
 
-function startServer() { const bridge = createStudioBridge({ bridgeUrl: ORIGIN }); server = http.createServer((request, response) => bridge(request, response, () => serve(request, response))); return new Promise((resolve, reject) => { server.once("error", reject); server.listen(PORT, HOST, resolve); }); }
+function startServer() { const bridge = createStudioBridge({ studioUrl: ORIGIN, applicationVersion: app.getVersion() }); server = http.createServer((request, response) => bridge(request, response, () => serve(request, response))); return new Promise((resolve, reject) => { server.once("error", reject); server.listen(PORT, HOST, resolve); }); }
 function isStudioOrigin(value) { try { return new URL(value).origin === ORIGIN; } catch { return false; } }
 function safeUpdateError(error) {
   const message = String(error?.message || error || "");

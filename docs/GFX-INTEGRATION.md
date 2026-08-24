@@ -1,6 +1,6 @@
 # VERO Studio ↔ VERO GFX Integration
 
-VERO Studio implements the VERO GFX Studio Protocol V1 exactly as exposed by the GFX Local Bridge on `127.0.0.1:43110`.
+VERO Studio implements the VERO GFX Studio Protocol V1 through the dedicated GFX application service on `127.0.0.1:43111`. Port `43110` remains the independent VERO Local Bridge for vMix and machine services.
 
 ## Runtime flow
 

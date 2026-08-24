@@ -14,8 +14,9 @@ export default function SettingsPage({ production, onProductionChange, controlle
     </article>
     <article>
       <h3>Connections</h3>
-      <label>STUDIO BRIDGE URL<input value={draft.bridgeUrl} onChange={(event) => setDraft({ ...draft, bridgeUrl: event.target.value })} /></label>
-      <label>VERO GFX BRIDGE URL<input value={draft.gfxBridgeUrl} onChange={(event) => setDraft({ ...draft, gfxBridgeUrl: event.target.value })} /></label>
+      <label>STUDIO ENGINE URL<input value={draft.studioEngineUrl} onChange={(event) => setDraft({ ...draft, studioEngineUrl: event.target.value })} /></label>
+      <label>VERO GFX PROTOCOL URL<input value={draft.gfxProtocolUrl} onChange={(event) => setDraft({ ...draft, gfxProtocolUrl: event.target.value })} /></label>
+      <label>VERO LOCAL BRIDGE URL<input value={draft.localBridgeUrl} onChange={(event) => setDraft({ ...draft, localBridgeUrl: event.target.value })} /></label>
       <button className="primary" onClick={() => controller.saveSettings(draft)}>SAVE CONNECTIONS</button>
     </article>
     <article><h3>Account</h3><p>No VERO Account backend is configured. Studio does not create a fake identity or store passwords.</p></article>

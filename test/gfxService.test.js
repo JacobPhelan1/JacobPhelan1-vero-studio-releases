@@ -8,7 +8,7 @@ test("Protocol V1 connects, exchanges identity, and exposes real GFX metadata", 
   const requests = [];
   const fetcher = async (url, options = {}) => {
     requests.push({ url, options, body: options.body ? JSON.parse(options.body) : null });
-    if (url.endsWith("/health")) return json({ ok: true, protocolVersion: 1, gfxApplications: 1 });
+    if (url.endsWith("/health")) return json({ ok: true, applicationId: "vero-gfx", applicationType: "gfx", applicationVersion: "0.14.10", protocolVersion: 1, gfxApplications: 1 });
     if (url.endsWith("/connect")) return json({ ok: true, protocolVersion: 1, gfxApplications: [{ applicationId: "vero-gfx", applicationType: "gfx", applicationVersion: "0.14.10", instanceId: "gfx-1", protocolVersion: 1, activeProductionId: "prod-1", activeProductionName: "Roland @ Muldrow", capabilities: ["production-context", "graphics-quick-actions"], graphics: [{ graphicId: "scorebug", displayName: "Scorebug", ready: true }], output: { bridge: "available", vmix: "Connected" } }] });
     throw new Error(`Unexpected request ${url}`);
   };
@@ -23,14 +23,19 @@ test("Protocol V1 connects, exchanges identity, and exposes real GFX metadata", 
 });
 
 test("rejects an incompatible broker protocol before sending commands", async () => {
-  const service = new GfxService({ fetcher: async () => json({ ok: true, protocolVersion: 2 }) });
+  const service = new GfxService({ fetcher: async () => json({ ok: true, applicationId: "vero-gfx", applicationType: "gfx", protocolVersion: 2 }) });
   await assert.rejects(service.connect(), (error) => error.code === "VERSION_INCOMPATIBLE" && error.protocolVersion === 2);
   assert.equal(service.connected, false);
 });
 
-test("identifies a running legacy GFX build without Protocol V1 as incompatible", async () => {
+test("identifies an application without the dedicated Protocol V1 endpoint", async () => {
   const service = new GfxService({ fetcher: async () => new Response("<!doctype html><title>VERO GFX</title>", { status: 200, headers: { "content-type": "text/html" } }) });
-  await assert.rejects(service.connect(), (error) => error.code === "VERSION_INCOMPATIBLE" && /must be updated/i.test(error.message));
+  await assert.rejects(service.connect(), (error) => error.code === "GFX_PROTOCOL_UNAVAILABLE" && /endpoint is unavailable/i.test(error.message));
+});
+
+test("rejects a service that does not identify as the GFX application", async () => {
+  const service = new GfxService({ fetcher: async () => json({ ok: true, applicationId: "vero-bridge", applicationType: "bridge", protocolVersion: 1 }) });
+  await assert.rejects(service.connect(), (error) => error.code === "GFX_PROTOCOL_UNAVAILABLE" && /did not identify/i.test(error.message));
 });
 
 test("sends the GFX production-context schema and waits for confirmed commands", async () => {
@@ -38,7 +43,7 @@ test("sends the GFX production-context schema and waits for confirmed commands",
   const fetcher = async (url, options = {}) => {
     const body = options.body ? JSON.parse(options.body) : null;
     requests.push({ url, body });
-    if (url.endsWith("/health")) return json({ ok: true, protocolVersion: 1 });
+    if (url.endsWith("/health")) return json({ ok: true, applicationId: "vero-gfx", applicationType: "gfx", protocolVersion: 1 });
     if (url.endsWith("/connect")) return json({ ok: true, gfxApplications: [{ applicationId: "vero-gfx", applicationType: "gfx", protocolVersion: 1 }] });
     if (url.endsWith("/production-context")) return json({ ok: true, success: true, resultingState: { productionId: body.productionContext.productionId } });
     if (url.endsWith("/graphics/action")) return json({ ok: true, success: true, command: body.command, graphicId: body.graphicId, resultingState: "on-air" });
@@ -58,7 +63,7 @@ test("sends the GFX production-context schema and waits for confirmed commands",
 test("advances the GFX event cursor and never reports failed actions as successful", async () => {
   let eventCall = 0;
   const fetcher = async (url) => {
-    if (url.endsWith("/health")) return json({ ok: true, protocolVersion: 1 });
+    if (url.endsWith("/health")) return json({ ok: true, applicationId: "vero-gfx", applicationType: "gfx", protocolVersion: 1 });
     if (url.endsWith("/connect")) return json({ ok: true, gfxApplications: [{ applicationId: "vero-gfx", applicationType: "gfx", protocolVersion: 1 }] });
     if (url.includes("/events?cursor=")) { eventCall += 1; return json({ ok: true, cursor: 7, events: eventCall === 1 ? [{ cursor: 7, type: "GFX_STATE_CHANGED", payload: { layers: { SCOREBUG: "scorebug" } } }] : [] }); }
     if (url.endsWith("/graphics/action")) return json({ ok: false, success: false, error: "vMix unavailable" }, 422);
