@@ -3,7 +3,7 @@
   "productName": "VERO Studio",
   "description": "VERO Studio live broadcast production control application.",
   "author": "VERO Broadcasting, LLC",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "private": true,
   "type": "module",
   "main": "desktop/main.js",
@@ -61,8 +61,10 @@
       "artifactName": "VERO-Studio-Setup-${version}.${ext}"
     },
     "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
+      "oneClick": true,
+      "perMachine": false,
+      "allowElevation": false,
+      "packElevateHelper": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "VERO Studio",

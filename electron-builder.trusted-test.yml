@@ -17,8 +17,10 @@ win:
   signtoolOptions:
     certificateSubjectName: VERO Broadcasting LLC
 nsis:
-  oneClick: false
-  allowToChangeInstallationDirectory: true
+  oneClick: true
+  perMachine: false
+  allowElevation: false
+  packElevateHelper: false
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: VERO Studio

@@ -25,6 +25,9 @@ jobs:
       - run: npm run desktop:icon
       - name: Build installer and update metadata
         run: npx electron-builder --win nsis --publish never
+        env:
+          CSC_LINK: ${{ secrets.WINDOWS_SIGNING_CERTIFICATE }}
+          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_SIGNING_PASSWORD }}
       - name: Verify update artifacts
         shell: pwsh
         run: |

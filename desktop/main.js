@@ -2,7 +2,7 @@ import { app, BrowserWindow, dialog, ipcMain, Menu, session, shell } from "elect
 import updater from "electron-updater";
 import http from "node:http";
 import { createReadStream } from "node:fs";
-import { readFile, stat } from "node:fs/promises";
+import { appendFile, mkdir, readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createStudioBridge } from "./studioBridge.js";
@@ -12,6 +12,12 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."), D
 const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".webp": "image/webp", ".svg": "image/svg+xml", ".mp4": "video/mp4", ".mov": "video/quicktime", ".mkv": "video/x-matroska", ".webm": "video/webm", ".mp3": "audio/mpeg", ".wav": "audio/wav", ".m4a": "audio/mp4", ".flac": "audio/flac" };
 let server, mainWindow, updateTimer, downloadedUpdate, activeUpdateCheck;
 let updateState = { status: "initializing", detail: "Starting VERO Studio…", version: "" };
+
+function writeUpdateLog(level, ...values) {
+  const line = `${new Date().toISOString()} [${level}] ${values.map((value) => value instanceof Error ? `${value.message}\n${value.stack || ""}` : typeof value === "string" ? value : JSON.stringify(value)).join(" ")}\n`;
+  const directory = app.getPath("logs");
+  void mkdir(directory, { recursive: true }).then(() => appendFile(path.join(directory, "updater.log"), line)).catch(() => {});
+}
 
 async function serve(request, response) {
   const url = new URL(request.url, ORIGIN); let relative = decodeURIComponent(url.pathname).replace(/^\/+/, "");
@@ -33,7 +39,10 @@ function safeUpdateError(error) {
 }
 function sendUpdateStatus(status, detail = "") { updateState = { status, detail, version: downloadedUpdate?.version || "" }; if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("updates:status", updateState); }
 function configureUpdater() {
-  const { autoUpdater } = updater; autoUpdater.autoDownload = true; autoUpdater.autoInstallOnAppQuit = true; autoUpdater.autoRunAppAfterInstall = true;
+  const { autoUpdater } = updater;
+  autoUpdater.logger = { info: (...values) => writeUpdateLog("INFO", ...values), warn: (...values) => writeUpdateLog("WARN", ...values), error: (...values) => writeUpdateLog("ERROR", ...values), debug: (...values) => writeUpdateLog("DEBUG", ...values) };
+  autoUpdater.autoDownload = true; autoUpdater.autoInstallOnAppQuit = true; autoUpdater.autoRunAppAfterInstall = true;
+  writeUpdateLog("INFO", `Updater initialized for VERO Studio ${app.getVersion()} as a per-user installation.`);
   autoUpdater.on("checking-for-update", () => sendUpdateStatus("checking"));
   autoUpdater.on("update-available", (info) => sendUpdateStatus("downloading", `VERO Studio ${info.version}`));
   autoUpdater.on("update-not-available", () => sendUpdateStatus("current", `VERO Studio ${app.getVersion()} is current.`));
@@ -52,7 +61,7 @@ function createWindow() {
 
 ipcMain.handle("updates:check", checkForUpdates);
 ipcMain.handle("updates:status", () => updateState);
-ipcMain.handle("updates:install", () => { if (!downloadedUpdate) return { ok: false, reason: "No update is ready." }; updater.autoUpdater.quitAndInstall(true, true); return { ok: true }; });
+ipcMain.handle("updates:install", () => { if (!downloadedUpdate) return { ok: false, reason: "No update is ready." }; writeUpdateLog("INFO", `Applying VERO Studio ${downloadedUpdate.version || "update"} and restarting.`); updater.autoUpdater.quitAndInstall(true, true); return { ok: true }; });
 ipcMain.handle("media:choose", async (_event, kind) => { const filters=kind==="image"?[{name:"Images",extensions:["png","jpg","jpeg","gif","webp","bmp"]}]:kind==="audio"?[{name:"Audio",extensions:["mp3","wav","m4a","flac","aac"]}]:[{name:"Video",extensions:["mp4","mov","mkv","webm","avi","m4v"]}];const result=await dialog.showOpenDialog(mainWindow,{title:`Select ${kind||"media"} input`,properties:["openFile"],filters});if(result.canceled||!result.filePaths[0])return{ok:false,canceled:true};const selected=result.filePaths[0];return{ok:true,path:selected,name:path.basename(selected)};});
 if (!app.requestSingleInstanceLock()) app.quit(); else app.whenReady().then(async () => { await startServer(); configureUpdater(); Menu.setApplicationMenu(null); createWindow(); });
 app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
