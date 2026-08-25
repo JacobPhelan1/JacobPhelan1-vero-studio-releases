@@ -43,7 +43,14 @@ export function useStudioController() {
     const context = productionContext(production); activeContext.current = context;
     try { await bridgeClient.publishContext({ schemaVersion: 1, applicationId: APP_CONFIG.applicationId, ...context, programInputId: production.inputConfiguration?.programInputId || null, updatedAt: new Date().toISOString() }); } catch (error) { addAlert(`Studio engine context sync failed: ${error.message}`); }
     if (!gfxService.connected || !gfxService.application) return false;
-    try { await gfxService.sendProductionContext(context); await refreshGfx(); return true; } catch (error) { addAlert(`VERO GFX production sync failed: ${error.message}`); return false; }
+    try { await gfxService.sendProductionContext(context); await refreshGfx(); return true; }
+    catch (error) {
+      if (error.code === "GFX_COMMAND_TIMEOUT") {
+        const snapshot = await refreshGfx();
+        if (snapshot.activeProductionId === context.productionId) return true;
+      }
+      addAlert(`VERO GFX production sync failed: ${error.message}`); return false;
+    }
   }, [addAlert, bridgeClient, refreshGfx]);
   const triggerGraphic = useCallback(async (graphic, command) => {
     const key = graphic.graphicId; setGfxCommands((current) => ({ ...current, [key]: command }));

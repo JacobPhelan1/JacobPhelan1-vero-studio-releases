@@ -60,6 +60,34 @@ test("sends the GFX production-context schema and waits for confirmed commands",
   assert.equal(result.resultingState, "on-air");
 });
 
+test("coalesces identical production-context submissions", async () => {
+  let contextRequests = 0;
+  let release;
+  const fetcher = async (url) => {
+    if (url.endsWith("/health")) return json({ ok: true, applicationId: "vero-gfx", applicationType: "gfx", protocolVersion: 1 });
+    if (url.endsWith("/connect")) return json({ ok: true, gfxApplications: [{ applicationId: "vero-gfx", applicationType: "gfx", instanceId: "gfx-1", protocolVersion: 1 }] });
+    if (url.endsWith("/production-context")) { contextRequests += 1; await new Promise((resolve) => { release = resolve; }); return json({ ok: true, success: true }); }
+    throw new Error(`Unexpected request ${url}`);
+  };
+  const service = new GfxService({ fetcher });
+  await service.connect();
+  const context = { productionId: "prod-1", productionName: "Game" };
+  const first = service.sendProductionContext(context);
+  const second = service.sendProductionContext(context);
+  assert.equal(contextRequests, 1);
+  release();
+  await Promise.all([first, second]);
+  const third = await service.sendProductionContext(context);
+  assert.equal(contextRequests, 1);
+  assert.equal(third.deduplicated, true);
+});
+
+test("preserves the GFX timeout error code for late-confirmation reconciliation", async () => {
+  const service = new GfxService({ fetcher: async () => json({ ok: false, error: "GFX_COMMAND_TIMEOUT", message: "GFX replied too late." }, 504) });
+  service.connected = true;
+  await assert.rejects(service.sendProductionContext({ productionId: "prod-1" }), (error) => error.code === "GFX_COMMAND_TIMEOUT" && /too late/i.test(error.message));
+});
+
 test("advances the GFX event cursor and never reports failed actions as successful", async () => {
   let eventCall = 0;
   const fetcher = async (url) => {
