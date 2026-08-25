@@ -1,0 +1,46 @@
+.monitor > div { aspect-ratio: 16 / 9; }
+.monitor img, .source-surface video, .source-surface img, .source-surface iframe { object-fit: contain; }
+.monitor > header > div { display: flex; align-items: center; gap: 10px; }
+.monitor > header button, .production-actions button { padding: 5px 8px; color: #91a0ab; background: #111920; border: 1px solid #35424c; border-radius: 3px; font-size: 7px; font-weight: 900; letter-spacing: .1em; }
+.production-actions { display: flex; align-items: center; gap: 8px; }
+.fullscreen-output { width: 100vw; height: 100vh; overflow: hidden; background: #000; }
+.fullscreen-output.single .source-surface { width: 100vw; height: 100vh; }
+.fullscreen-output.multiview { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 4px; padding: 4px; }
+.fullscreen-tile { position: relative; min-width: 0; min-height: 0; overflow: hidden; background: #030506; border: 1px solid #25313a; }
+.fullscreen-tile.preview { grid-column: span 2; grid-row: span 2; border-color: #44c873; }
+.fullscreen-tile.program { grid-column: span 2; grid-row: span 2; border-color: var(--red); }
+.fullscreen-tile > header { position: absolute; inset: 0 0 auto; z-index: 2; padding: 7px 9px; background: linear-gradient(#071015d9, transparent); font-size: 9px; font-weight: 900; letter-spacing: .13em; }
+.fullscreen-tile.preview > header { color: #62da8a; }
+.fullscreen-tile.program > header { color: #ff6c75; }
+.settings { display: flex; flex-direction: column; gap: 10px; }
+.settings > header { width: 100%; }
+.settings > details { background: var(--panel); border: 1px solid var(--line); }
+.settings > details > summary { display: flex; align-items: center; justify-content: space-between; padding: 17px 20px; color: #fff; cursor: pointer; font-size: 12px; font-weight: 900; letter-spacing: .05em; list-style: none; }
+.settings > details > summary::after { content: "+"; color: var(--cyan); font-size: 18px; }
+.settings > details[open] > summary::after { content: "−"; }
+.settings > details > article, .settings > details > .connections { margin: 0 20px 20px; }
+.connections.embedded { padding-top: 2px; }
+.advanced-input { padding: 14px; background: #091016; border: 1px solid #25343e; }
+.advanced-input summary { color: var(--cyan); cursor: pointer; font-size: 9px; font-weight: 900; letter-spacing: .12em; }
+.control-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 14px !important; margin-top: 16px; }
+.range-control { display: grid !important; grid-template-columns: minmax(110px, 1fr) 80px !important; align-items: end; gap: 10px !important; }
+.range-control input[type="range"] { padding: 0; }
+.advanced-input > button { margin-top: 14px; }
+.audio-handoff { display: grid; grid-template-columns: minmax(190px, 330px) 1fr auto; align-items: center; gap: 24px; margin-bottom: 18px; padding: 20px; background: linear-gradient(105deg, #211405, #11100d 65%, #0d1319); border: 1px solid #5b3a12; }
+.audio-handoff img { width: 100%; max-height: 90px; object-fit: contain; }
+.audio-handoff h3 { margin: 0 0 7px; color: #fff; }
+.audio-handoff p { margin: 0; color: #a88d6b; font-size: 10px; line-height: 1.55; }
+.audio-handoff button { padding: 12px 16px; color: #e8a128; background: #201508; border: 1px solid #6a4312; font-size: 8px; font-weight: 900; }
+.streaming-page .streaming-layout { display: grid; grid-template-columns: minmax(260px, .7fr) minmax(420px, 1.3fr); gap: 14px; }
+.stream-card { padding: 20px; background: var(--panel); border: 1px solid var(--line); }
+.stream-card h3 { margin: 0 0 16px; color: #fff; }
+.stream-card label { margin-bottom: 12px; }
+.stream-destinations { display: grid; gap: 9px; }
+.stream-destination { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 13px; background: #080d11; border: 1px solid #28343d; }
+.stream-destination input[type="checkbox"] { width: 18px; height: 18px; }
+.stream-destination span { display: flex; flex-direction: column; gap: 4px; }
+.stream-destination small { color: var(--muted); font-size: 8px; }
+.stream-status { margin-top: 15px; padding: 14px; color: #8b99a4; background: #080d11; border: 1px solid #28343d; font-size: 9px; line-height: 1.6; }
+.stream-card .primary { width: 100%; margin-top: 12px; padding: 13px; border: 0; font-weight: 900; }
+@media (max-width: 1250px) { .audio-handoff { grid-template-columns: 220px 1fr; } .audio-handoff button { grid-column: 1 / -1; } .streaming-page .streaming-layout { grid-template-columns: 1fr; } }
+@media (max-height: 800px) { .monitor > div { aspect-ratio: 16 / 9; } }

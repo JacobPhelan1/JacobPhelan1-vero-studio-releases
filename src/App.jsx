@@ -6,8 +6,15 @@ import { useUpdater } from "./state/useUpdater";
 import Startup from "./components/Startup";
 import Shell from "./components/Shell";
 import UpdateNotice from "./components/UpdateNotice";
+import FullscreenSurface from "./components/workspace/FullscreenSurface";
 
 export default function App() {
+  const surface = new URLSearchParams(window.location.search).get("surface");
+  if (surface) return <FullscreenSurface surface={surface} />;
+  return <StudioApp />;
+}
+
+function StudioApp() {
   const [production, setProduction] = useState(() => productionStore.getActive());
   const controller = useStudioController();
   const updater = useUpdater();

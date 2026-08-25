@@ -2,14 +2,14 @@ import { useState } from "react";
 import ProductionWorkspace from "./workspace/ProductionWorkspace";
 import InputsPage from "./workspace/InputsPage";
 import AudioPage from "./workspace/AudioPage";
-import ConnectionsPage from "./workspace/ConnectionsPage";
 import GraphicsPage from "./workspace/GraphicsPage";
 import SettingsPage from "./workspace/SettingsPage";
+import StreamingPage from "./workspace/StreamingPage";
 
-const nav = ["Production", "Inputs", "Graphics", "Audio", "Connections", "Settings"];
+const nav = ["Production", "Inputs", "Graphics", "Audio", "Streaming", "Settings"];
 export default function Shell({ production, onProductionChange, onClose, controller, updater }) {
   const [page, setPage] = useState("Production");
-  const views = { Production: <ProductionWorkspace production={production} onProductionChange={onProductionChange} controller={controller} />, Inputs: <InputsPage production={production} onProductionChange={onProductionChange} />, Graphics: <GraphicsPage production={production} controller={controller} />, Audio: <AudioPage production={production} onProductionChange={onProductionChange} />, Connections: <ConnectionsPage controller={controller} />, Settings: <SettingsPage production={production} onProductionChange={onProductionChange} controller={controller} updater={updater} /> };
+  const views = { Production: <ProductionWorkspace production={production} onProductionChange={onProductionChange} controller={controller} />, Inputs: <InputsPage production={production} onProductionChange={onProductionChange} />, Graphics: <GraphicsPage production={production} controller={controller} />, Audio: <AudioPage production={production} onProductionChange={onProductionChange} />, Streaming: <StreamingPage production={production} onProductionChange={onProductionChange} />, Settings: <SettingsPage production={production} onProductionChange={onProductionChange} controller={controller} updater={updater} /> };
   return <div className="app-shell">
     <aside>
       <header><img src="/brand/studio/IconWordmarkStudio.png" alt="VERO Studio" /></header>

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, Menu, session, shell } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, Menu, screen, session, shell } from "electron";
 import updater from "electron-updater";
 import http from "node:http";
 import { createReadStream } from "node:fs";
@@ -11,6 +11,7 @@ const HOST = "127.0.0.1", PORT = 43120, ORIGIN = `http://${HOST}:${PORT}`;
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."), DIST = path.join(ROOT, "dist"), UPDATE_INTERVAL = 6 * 60 * 60 * 1000;
 const mime = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".gif": "image/gif", ".webp": "image/webp", ".svg": "image/svg+xml", ".mp4": "video/mp4", ".mov": "video/quicktime", ".mkv": "video/x-matroska", ".webm": "video/webm", ".mp3": "audio/mpeg", ".wav": "audio/wav", ".m4a": "audio/mp4", ".flac": "audio/flac" };
 let server, mainWindow, updateTimer, downloadedUpdate, activeUpdateCheck;
+const viewWindows = new Map();
 let updateState = { status: "initializing", detail: "Starting VERO Studio…", version: "" };
 
 function writeUpdateLog(level, ...values) {
@@ -59,10 +60,26 @@ function createWindow() {
   mainWindow.loadURL(ORIGIN); mainWindow.webContents.once("did-finish-load", () => { setTimeout(checkForUpdates, 8000); clearInterval(updateTimer); updateTimer = setInterval(checkForUpdates, UPDATE_INTERVAL); });
 }
 
+function openView(surface) {
+  const allowed = new Set(["multiview", "preview", "program"]);
+  if (!allowed.has(surface)) return { ok: false, reason: "Unknown fullscreen view." };
+  const existing = viewWindows.get(surface);
+  if (existing && !existing.isDestroyed()) { existing.focus(); return { ok: true, reused: true }; }
+  const displays = screen.getAllDisplays();
+  const mainDisplay = mainWindow ? screen.getDisplayMatching(mainWindow.getBounds()) : screen.getPrimaryDisplay();
+  const target = displays.find((display) => display.id !== mainDisplay.id) || mainDisplay;
+  const window = new BrowserWindow({ x: target.bounds.x, y: target.bounds.y, width: target.bounds.width, height: target.bounds.height, fullscreen: true, backgroundColor: "#020405", title: `VERO Studio · ${surface}`, autoHideMenuBar: true, icon: path.join(ROOT, "public", "brand", "studio", "IconStudio.png"), webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, preload: path.join(ROOT, "desktop", "preload.cjs"), additionalArguments: [`--vero-app-version=${app.getVersion()}`] } });
+  viewWindows.set(surface, window);
+  window.on("closed", () => viewWindows.delete(surface));
+  window.loadURL(`${ORIGIN}/?surface=${encodeURIComponent(surface)}`);
+  return { ok: true, displayId: target.id, externalDisplay: target.id !== mainDisplay.id };
+}
+
 ipcMain.handle("updates:check", checkForUpdates);
 ipcMain.handle("updates:status", () => updateState);
 ipcMain.handle("updates:install", () => { if (!downloadedUpdate) return { ok: false, reason: "No update is ready." }; writeUpdateLog("INFO", `Applying VERO Studio ${downloadedUpdate.version || "update"} and restarting.`); updater.autoUpdater.quitAndInstall(true, true); return { ok: true }; });
 ipcMain.handle("media:choose", async (_event, kind) => { const filters=kind==="image"?[{name:"Images",extensions:["png","jpg","jpeg","gif","webp","bmp"]}]:kind==="audio"?[{name:"Audio",extensions:["mp3","wav","m4a","flac","aac"]}]:[{name:"Video",extensions:["mp4","mov","mkv","webm","avi","m4v"]}];const result=await dialog.showOpenDialog(mainWindow,{title:`Select ${kind||"media"} input`,properties:["openFile"],filters});if(result.canceled||!result.filePaths[0])return{ok:false,canceled:true};const selected=result.filePaths[0];return{ok:true,path:selected,name:path.basename(selected)};});
+ipcMain.handle("views:open", (_event, surface) => openView(surface));
 if (!app.requestSingleInstanceLock()) app.quit(); else app.whenReady().then(async () => { await startServer(); configureUpdater(); Menu.setApplicationMenu(null); createWindow(); });
 app.on("window-all-closed", () => { if (process.platform !== "darwin") app.quit(); });
 app.on("before-quit", () => { clearInterval(updateTimer); server?.close(); });
